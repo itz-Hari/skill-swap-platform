@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Skill Swap Platform</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="bg-light">
+    <!-- NAVBAR -->
+    <%- include('partials/navbar', { user }) %>
+
+    <!-- HERO -->
+    <div class="container text-center my-5">
+      <h1 class="fw-bold">Swap Skills, Learn & Teach for Free!</h1>
+      <p class="text-muted">
+        Exchange knowledge with peers. No money involved.
+      </p>
+
+      <div class="row justify-content-center mt-4">
+        <div class="col-md-6">
+          <input
+            type="text"
+            class="form-control form-control-lg"
+            placeholder="Search skills (UI only)"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="container">
+      <h3 class="mb-4">Featured Skill Swappers</h3>
+
+      <div class="row">
+        <% users.forEach(u => { %>
+
+        <!-- 🚫 DO NOT SHOW LOGGED-IN USER -->
+        <% if (user && u.id === user.id) return; %>
+
+        <div class="col-md-4 mb-4">
+          <div class="card shadow-sm h-100 text-center">
+            <div class="card-body">
+              <!-- Avatar -->
+              <div
+                class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
+                style="width: 60px; height: 60px; font-size: 22px"
+              >
+                <%= u.name.charAt(0).toUpperCase() %>
+              </div>
+
+              <h5><%= u.name %></h5>
+              <p class="text-muted mb-2">Skill Swapper</p>
+
+              <p class="small">
+                <strong>Can Teach:</strong>
+                <%= u.teach && u.teach.length ? u.teach.join(", ") : "—" %>
+                <br />
+                <strong>Wants to Learn:</strong>
+                <%= u.learn && u.learn.length ? u.learn.join(", ") : "—" %>
+              </p>
+
+              <div class="d-flex justify-content-center gap-2">
+                <a
+                  href="/profile/<%= u.id %>"
+                  class="btn btn-outline-dark btn-sm"
+                >
+                  View Profile
+                </a>
+
+                <button
+                  class="btn btn-dark btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#requestModal"
+                  data-user="<%= u.id %>"
+                  data-name="<%= u.name %>"
+                >
+                  Request Swap
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- REQUEST MODAL -->
+    <div class="modal fade" id="requestModal" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Create Skill Exchange Request</h5>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <form method="POST" action="/dashboard/request">
+            <div class="modal-body">
+              <input type="hidden" name="receiver_id" id="receiver_id" />
+
+              <p class="text-muted">
+                Requesting swap with <strong id="receiver_name"></strong>
+              </p>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Skill You Want to Learn</label>
+                  <select name="skill_need" class="form-select" required>
+                    <option value="">Select</option>
+                    <option>HTML</option>
+                    <option>CSS</option>
+                    <option>JavaScript</option>
+                    <option>Python</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Skill You Can Teach</label>
+                  <select name="skill_offer" class="form-select" required>
+                    <option value="">Select</option>
+                    <option>HTML</option>
+                    <option>CSS</option>
+                    <option>JavaScript</option>
+                    <option>Python</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Message</label>
+                <textarea
+                  name="message"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Introduce yourself (optional)"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button class="btn btn-secondary" data-bs-dismiss="modal">
+                Cancel
+              </button>
+              <button class="btn btn-dark">Send Request</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      const requestModal = document.getElementById("requestModal");
+
+      requestModal.addEventListener("show.bs.modal", (event) => {
+        const button = event.relatedTarget;
+        document.getElementById("receiver_id").value =
+          button.getAttribute("data-user");
+        document.getElementById("receiver_name").innerText =
+          button.getAttribute("data-name");
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/home">Skill Swap</a>
+
+    <div class="dropdown ms-auto">
+      <a
+        class="text-white dropdown-toggle text-decoration-none"
+        data-bs-toggle="dropdown"
+        href="#"
+      >
+        <%= user.name %>
+      </a>
+
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+          <a class="dropdown-item" href="/profile/<%= user.id %>">
+            My Profile
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="/dashboard"> Dashboard </a>
+        </li>
+        <li><hr class="dropdown-divider" /></li>
+        <li>
+          <a class="dropdown-item text-danger" href="/logout"> Logout </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
