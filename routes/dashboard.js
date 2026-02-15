@@ -1,5 +1,5 @@
-const express = require('express');
-const db = require('../db');
+const express = require("express");
+const db = require("../db");
 const router = express.Router();
 
 /* =========================
@@ -52,72 +52,75 @@ router.get("/", (req, res) => {
       db.query(archivedQuery, [userId, userId], (err, archived) => {
         if (err) throw err;
 
+        // ✅ THIS IS THE IMPORTANT PART
         res.render("dashboard", {
           user: req.session.user,
-          incoming,   // ✅ correct
-          outgoing,   // ✅ correct
-          archived    // ✅ correct
+          incoming,
+          outgoing,
+          archived,
+          success: req.query.success || null,
+          error: req.query.error || null
         });
       });
     });
   });
 });
+
 /* =========================
    SEND REQUEST
 ========================= */
-router.post('/request', (req, res) => {
+router.post("/request", (req, res) => {
+  if (!req.session.user) return res.redirect("/");
+
   const sender_id = req.session.user.id;
   const { receiver_id, skill_offer, skill_need, message } = req.body;
-
-  console.log("MESSAGE FROM FORM 👉", message); // 🔥 ADD THIS
 
   db.query(
     `INSERT INTO requests 
      (sender_id, receiver_id, skill_offer, skill_need, message, status)
      VALUES (?, ?, ?, ?, ?, 'pending')`,
     [sender_id, receiver_id, skill_offer, skill_need, message],
-    () => res.redirect('/dashboard')
+    () => res.redirect("/dashboard?success=Request sent successfully")
   );
 });
 
 /* =========================
    ACCEPT REQUEST
 ========================= */
-router.post('/accept/:id', (req, res) => {
-  if (!req.session.user) return res.redirect('/');
+router.post("/accept/:id", (req, res) => {
+  if (!req.session.user) return res.redirect("/");
 
   db.query(
-    `UPDATE requests 
-     SET status = 'accepted' 
-     WHERE id = ?`,
+    `UPDATE requests SET status = 'accepted' WHERE id = ?`,
     [req.params.id],
-    () => res.redirect('/dashboard')
+    () => res.redirect("/dashboard?success=Request accepted")
   );
 });
 
 /* =========================
    REJECT REQUEST
 ========================= */
-router.post('/reject/:id', (req, res) => {
-  if (!req.session.user) return res.redirect('/');
+router.post("/reject/:id", (req, res) => {
+  if (!req.session.user) return res.redirect("/");
 
   db.query(
-    `UPDATE requests 
-     SET status = 'rejected' 
-     WHERE id = ?`,
+    `UPDATE requests SET status = 'rejected' WHERE id = ?`,
     [req.params.id],
-    () => res.redirect('/dashboard')
+    () => res.redirect("/dashboard?error=Request rejected")
   );
 });
 
-// DELETE SENT REQUEST
-router.post('/delete/:id', (req, res) => {
+/* =========================
+   DELETE SENT REQUEST
+========================= */
+router.post("/delete/:id", (req, res) => {
+  if (!req.session.user) return res.redirect("/");
+
   db.query(
     "DELETE FROM requests WHERE id = ? AND sender_id = ?",
     [req.params.id, req.session.user.id],
-    () => res.redirect('/dashboard')
+    () => res.redirect("/dashboard?success=Request deleted")
   );
 });
-
 
 module.exports = router;
